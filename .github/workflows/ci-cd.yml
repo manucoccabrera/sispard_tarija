@@ -1,12 +1,41 @@
-name: Build and Push Docker Images
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build-and-push:
+  lint-backend:
     runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    - name: Install dependencies
+      run: cd backend && npm install
+    - name: Run lint
+      run: cd backend && npm run lint
+
+  validate-k8s:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Validate Kubernetes manifests
+      run: |
+        for file in k8s/*.yaml; do
+          echo "Validating $file..."
+          # Usamos un comando simple de validación de sintaxis YAML
+          python3 -c "import yaml, sys; yaml.safe_load(open('$file'))"
+        done
+
+  build-and-push:
+    needs: [lint-backend, validate-k8s]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
