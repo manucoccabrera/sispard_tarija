@@ -28,8 +28,8 @@ jobs:
       run: |
         for file in k8s/*.yaml; do
           echo "Validating $file..."
-          # Usamos un comando simple de validación de sintaxis YAML
-          python3 -c "import yaml, sys; yaml.safe_load(open('$file'))"
+          # Usamos un comando simple de validación de sintaxis YAML (soporta múltiples documentos)
+          python3 -c "import yaml, sys; list(yaml.safe_load_all(open('$file')))"
         done
 
   build-and-push:

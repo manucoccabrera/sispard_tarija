@@ -20,7 +20,7 @@ foreach ($file in $files) {
     
     # Intentar parsear el YAML usando Python (similar al CI)
     $filePath = $file.FullName
-    $result = python -c "import yaml; yaml.safe_load(open(r'$filePath'))" 2>&1
+    $result = python -c "import yaml; list(yaml.safe_load_all(open(r'$filePath')))" 2>&1
     
     if ($LASTEXITCODE -eq 0) {
         Write-Host " [OK]" -ForegroundColor Green
